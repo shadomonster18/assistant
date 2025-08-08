@@ -1,4 +1,5 @@
-﻿from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QMessageBox
+﻿from imaplib import Commands
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton
 import speech_recognition as sr
 from gtts import gTTS
 import requests
@@ -7,15 +8,23 @@ import pyttsx3
 import keyboard as kb
 import threading
 import pygame
+import pyautogui as pg
 import ollama
 import time
 import os
-import tkinter as tk
-from tkinter import messagebox
+import cv2
+
+BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
+API_KEY = "037ba4f97795497e172cbc0a510c17c0"
+
+def get_weather(city):
+    url = BASE_URL + "appid=" + API_KEY + "&q=" + city
+    
+    response = requests.get(url).json()
+    
+    return response
 
 listen = True
-def show_message(message):
-        messagebox.showinfo("Response", message)
 def animation(filename):
     import sys
     from PyQt5.QtWidgets import QApplication, QLabel
@@ -33,12 +42,16 @@ def animation(filename):
     layout.setContentsMargins(10, 10, 10, 10)
     layout.setSpacing(5)
 
+    text_label = QLabel('Voice Assistant')
+    text_label.setStyleSheet("font-size: 18px; color: lightblue;")
+    layout.addWidget(text_label)
+
     # GIF animation
     label = QLabel()
     movie = QMovie(filename)
     label.setMovie(movie)
     movie.start()
-    layout.addWidget(label)
+    #layout.addWidget(label)
 
     # Entry bar (under GIF)
     entry = QLineEdit()
@@ -48,7 +61,7 @@ def animation(filename):
     # Submit button
     button = QPushButton("Submit")
     layout.addWidget(button)
-
+        
     # Optional: Handle the submit button
     def on_submit():
         text = entry.text()
@@ -65,7 +78,7 @@ def animation(filename):
 
     # Move window to bottom right
     screen = app.primaryScreen().availableGeometry()
-    x = screen.width() - window.width() - 30
+    x = 30
     y = screen.height() - window.height() - 60
     window.move(x, y)
 
@@ -100,7 +113,6 @@ def speak(text):
     engine.runAndWait()
 
 def get_output(text):
-    print("👂 Waiting for voice input...")
     # play_audio("listening.mp3")
     try:
         # audio = recognizer.listen(source)  # Wait indefinitely for speech
@@ -116,6 +128,23 @@ def get_output(text):
             kit.search(" ".join(words[1:]))
         elif command == "youtube":
             kit.playonyt(" ".join(words[1:]))
+        elif command == "open":
+            kb.press_and_release("windows")
+            time.sleep(0.3)
+            kb.write(" ".join(words[1:]))
+            time.sleep(0.3)
+            kb.press_and_release("enter")
+        if command == "weather":
+            try:
+                weather = get_weather(" ".join(words[1:]))
+                temp = int(weather["main"]["temp"] - 273)
+                feels_like = int(weather["main"]["feels_like"] -273)
+                humidity = weather["main"]["humidity"]
+                description = weather["weather"][0]["description"]
+            
+                speak(f"The current weather in {' '.join(words[1:])} is {temp} degrees celsius, feels like {feels_like} degrees, with a humidity of {humidity}, and {description}.")
+            except:
+                speak("a fatal error occured while retrieving weather data.")
         elif user_input.lower() == "one":
             requests.get('https://shadomonster18.pythonanywhere.com/song/rickroll')
         elif user_input.lower() == "two":
@@ -125,16 +154,18 @@ def get_output(text):
         elif user_input.lower() == "led":
             requests.get('https://shadomonster18.pythonanywhere.com/song/led on')
         elif user_input.lower() == "off":
+            
             requests.get('https://shadomonster18.pythonanywhere.com/song/off')
         else:
-            response = ollama.chat(model="codellama", messages=messages)
-            assistant_reply = response['message']['content']
-            print("Assistant:", assistant_reply)
-            messages.append({"role": "assistant", "content": assistant_reply})
+            commands = ["search", "youtube", "open", "weather"]
+            
+            if command not in commands:
+                response = ollama.chat(model="codellama", messages=messages)
+                assistant_reply = response['message']['content']
+                print("Assistant:", assistant_reply)
+                messages.append({"role": "assistant", "content": assistant_reply})
 
-#            show_message(assistant_reply)
-
-            speak(assistant_reply)
+                speak(assistant_reply)
             
 
             # tts = gTTS(text=assistant_reply, lang="en", slow=False)
@@ -164,22 +195,20 @@ tts.save("sorry.mp3")
 tts = gTTS(text="Listening", lang="en", slow=False)
 tts.save("listening.mp3")
 
-"""
+#"""
 while True:
-
+    '''
     try:
         with sr.Microphone() as source:
             recognizer.adjust_for_ambient_noise(source, duration=0.5)
             #recognizer.energy_threshold = 100
-            print("🎤 Voice assistant ready and listening...")
-
             while True:
-                print("👂 Waiting for voice input...")
                 #play_audio("listening.mp3")
                 try:
                     #audio = recognizer.listen(source)  # Wait indefinitely for speech
                     #user_input = recognizer.recognize_google(audio)
-                    user_input = input("Prompt: ")
+                    
+                    user_input = input()
                     print("You said:", user_input)
 
                     messages.append({"role": "user", "content": user_input})
@@ -225,4 +254,5 @@ while True:
 
     except KeyboardInterrupt:
         print("👋 Goodbye!")
-        """
+        '''
+ #       """

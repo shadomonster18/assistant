@@ -1,0 +1,58 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\gabib\\source\\repos\\AI\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2E493EBA-6C2E-4268-848D-821B60EF818D}|AI\\AI.pyproj|C:\\Users\\gabib\\source\\repos\\AI\\AI\\AI.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{2E493EBA-6C2E-4268-848D-821B60EF818D}|AI\\AI.pyproj|solutionrelative:AI\\AI.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2E493EBA-6C2E-4268-848D-821B60EF818D}|AI\\AI.pyproj|C:\\Users\\gabib\\source\\repos\\AI\\AI\\code.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{2E493EBA-6C2E-4268-848D-821B60EF818D}|AI\\AI.pyproj|solutionrelative:AI\\code.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "code.txt",
+              "DocumentMoniker": "C:\\Users\\gabib\\source\\repos\\AI\\AI\\code.txt",
+              "RelativeDocumentMoniker": "AI\\code.txt",
+              "ToolTip": "C:\\Users\\gabib\\source\\repos\\AI\\AI\\code.txt",
+              "RelativeToolTip": "AI\\code.txt",
+              "ViewState": "AQIAAJgAAAAAAAAAAAAAAAEBAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2024-07-08T17:18:24.623Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AI.py",
+              "DocumentMoniker": "C:\\Users\\gabib\\source\\repos\\AI\\AI\\AI.py",
+              "RelativeDocumentMoniker": "AI\\AI.py",
+              "ToolTip": "C:\\Users\\gabib\\source\\repos\\AI\\AI\\AI.py",
+              "RelativeToolTip": "AI\\AI.py",
+              "ViewState": "AQIAAJkAAAAAAAAAAAAAABoAAAAAAAAA",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHfSURBVDhPpZCxaxNhGMZ/9zVJaUuDUlq1FBWLZBFTCXo4BFyU1qGKi4OkIHhkzF/g0KF00M2lR9YUdDDQQVAcJILoQUd1UNRmkhoRm8RL777v7nOoCZd4AcEH3uF5nvd73vd74X\u002BgtTai3LIsHeWDEEJct217a1DvwbIs7bpubFUqFW3b9naxWLwWfSOipAvHcfqqi0KhkMtms3cty1rsaomeG4FpmoMSANVqlXQ6nQMWgacMC4hOBchduEj\u002ByjKjScGh8SS1Wq3nxQZEN3j1eY/Vrfe8rTeQvsf89ARLS1cz5XIZ/uUGXxptQiVRUhJIybudXaZn52a7vbEBpmkyNb/A69YM9W8tDEJOTI2hpI\u002BSkvOZH2f13sNAB\u002B07sV9wHIdH9Unquz9RvoeUPtL3UFISKkky\u002BAT7HwTi6FpsgGma3N9\u002Bg5I\u002BKaFZyU8wOpJChwHnjiuE9wKCXyC/zsQGOI7DeELjtiUPbgky6Wd/HA3KBelC4AIpNfQGl88cQ0mfI5PugRhKkM2DUk0INYwtPI/dAGAlf4rbl06T6DyBVgeCABJzYPhwcm0V8ICNvwJKpVIf37h3IxSyKVAuBMDIYQAMw1jvaxwGrYNl3Xq5o79vat3Y3Nedj4\u002B11je7/m\u002BXOuyzFtDhUgAAAABJRU5ErkJggg==",
+              "WhenOpened": "2024-07-08T17:07:27.557Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
