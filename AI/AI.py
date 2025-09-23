@@ -20,7 +20,7 @@ import cv2
 import torch
 
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
-API_KEY = "037ba4f97795497e172cbc0a510c17c0"
+API_KEY = "API_KEY"
 
 
 
