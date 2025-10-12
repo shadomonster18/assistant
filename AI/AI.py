@@ -1,9 +1,11 @@
 from concurrent.futures import thread
+import subprocess as sb
 from imaplib import Commands
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton
 import speech_recognition as sr
 from gtts import gTTS
 import requests
+import shutil
 try:
     import pywhatkit as kit
 except:
@@ -19,9 +21,21 @@ import os
 import cv2
 import torch
 import psutil
+import requests
+from time import sleep
+from selenium.webdriver.common.by import By
+from selenium import webdriver
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import pyttsx3
+import ollama
+import shlex
+
+
 
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
-API_KEY = "037ba4f97795497e172cbc0a510c17c0"
+API_KEY = "OPEN_WEATHERMAP_KEY"
 
 
 
@@ -39,7 +53,8 @@ def torch_load_patch(*args, **kwargs):
 torch.load = torch_load_patch
 
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-
+#model.to('cuda')
+model.conf = 0.4
 
 
 def get_classes():
@@ -59,20 +74,36 @@ def get_classes():
     else:
         print("Failed to capture image")
 
-    cap.release()
-    cv2.destroyAllWindows()
 
-    results = model("captured_image.jpg")
+    results = model("captured_image.jpg", size=320)
+    detections = results.xyxy[0]
 
-    for *box, conf, cls in results.xyxy[0]:
+    for *box, conf, cls in detections:
+        if conf < 0.4:
+            continue
         class_name = model.names[int(cls)]
+        x1, y1, x2, y2 = map(int, box)
+
+        label = f"{model.names[int(cls)]} {conf:.2f}"
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         #if class_name == 'person':
          #   print("\nHuman detected!")
           #  break
         
         class_list.append(class_name)
         print(class_name)
-    annotated_frame = results.render()[0]
+    #annotated_frame = results.render()[0]
+
+    if ret:
+        cv2.imwrite("captured_image.jpg", frame)
+        print("Image saved as captured_image.jpg")
+    else:
+        print("Failed to capture image")
+
+    sb.call("start captured_image.jpg", shell=True)
+    cap.release()
+    cv2.destroyAllWindows()
     #cv2.imshow("YOLOv5 Detection", annotated_frame)
     #cv2.waitKey(0)
     #0cv2.destroyAllWindows()
@@ -120,7 +151,6 @@ def animation(filename):
     speak = QPushButton("Voice")
     layout.addWidget(speak)
         
-    # Optional: Handle the submit button
     def on_submit():
         text = entry.text()
         out_thread = threading.Thread(target=get_output, args=(text,)).start()
@@ -209,17 +239,37 @@ def get_output(text):
         words = user_input.lower().split()
         command = words[0] if words else ""
 
-        
+        # commmands
         if command == "search":
             kit.search(" ".join(words[1:]))
         elif command == "youtube":
             kit.playonyt(" ".join(words[1:]))
         elif command == "open":
+            #os.startfile(" ".join(words[1:]))
             kb.press_and_release("windows")
             time.sleep(0.3)
             kb.write(" ".join(words[1:]))
             time.sleep(0.3)
             kb.press_and_release("enter")
+
+            '''
+            apps = {
+                "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                "edge": r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+
+                }
+
+            #os.startfile(" ".join(words[1:]))
+            try:
+                sb.call(f'start "" "{ " ".join(words[1:]) }"', shell=True)
+            except Exception as e:
+                try:
+                    sb.call(f'start "" "{ apps[" ".join(words[1:]).lower()] }"', shell=True)
+                except:
+                    say("application not found", speak)
+                    '''
+            return
+        
         if command == "weather":
             try:
                 weather = get_weather(" ".join(words[1:]))
@@ -236,11 +286,69 @@ def get_output(text):
             memory = round(psutil.virtual_memory().total / (1024 ** 3), 1)
             available_memory = round(psutil.virtual_memory().available / (1024 ** 3), 1)
             disk = round(psutil.disk_usage('/').total / (1024 ** 3), 1)
+            used = round(psutil.disk_usage('/').used / (1024 ** 3), 1)
 
-            message = f"CPU Usage: {cpu}%, available RAM: {available_memory}GB, total RAM: {memory}GB, disk: {disk}GB"
+            message = f"CPU Usage: {cpu}%, available RAM: {available_memory}GB, total RAM: {memory}GB, total SSD: {disk}GB, SSD used: {used}GB"
 
             print(message)
             say(message, speak)
+        elif command == "cnn":
+            url = "https://www.edition.cnn.com/search?q="
+            search = user_input.lower().replace("cnn", "")
+
+            # Set up Chrome options for headless browsing
+            options = webdriver.ChromeOptions()
+            options.add_argument('--headless=new')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-blink-features=AutomationControlled')
+
+            driver = webdriver.Chrome(options=options)
+            driver.get(url+search)
+
+            sleep(7)
+            try:
+
+                cookies = driver.find_element(By.XPATH, "//*[contains(text(), 'Accept All')]")
+                cookies.click()
+            except:
+                print("no cookies")
+            sleep(3)
+            label = driver.find_element(By.XPATH, "//*[contains(text(), 'Stories')]")
+            label.click()
+
+            sleep(2)
+
+            try:
+                title = driver.find_element(By.CLASS_NAME, "container__headline-text")
+                title.click()
+            except:
+                print("no articles found")
+
+      
+            article_element = driver.find_element(By.CSS_SELECTOR, 'div.article__content')
+
+             # Extract and print the article text
+            article_text = article_element.text
+            driver.quit()
+
+            news_messages = [
+                {
+                    "role": "system",
+                    "content": "summarize the contents of this article in a few lines."
+                }
+            ]
+
+            news_messages.append({"role": "user", "content": article_text})
+
+            print(article_text + "\n\n\n\n\n")
+            response = ollama.chat(model="codellama", messages=news_messages)
+            assistant_reply = response['message']['content']
+
+            print("Assistant:", assistant_reply)
+            news_messages.append({"role": "assistant", "content": assistant_reply})
+            say(assistant_reply, True)
+
+
         elif command == "camera":
             classes = get_classes()
             classes = list(set(classes))
@@ -253,6 +361,38 @@ def get_output(text):
                 say(text, speak)
             else:
                 say("I dont see anything", speak)
+        elif command == "stream":
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                exit()
+
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                results = model(frame, size=320)
+                annotated_frame = results.render()[0]
+                cv2.imshow("YOLOv5 Webcam Stream", annotated_frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+        elif command == "move-files":
+            num_files_moved = 0
+            parts = shlex.split(user_input)
+
+            try:
+                search_folder = parts[1]
+                target_folder = parts[2]
+                file_extension = parts[3]
+                for file in os.listdir(search_folder):
+                    if file.endswith(file_extension):
+                        origin = os.path.join(search_folder, file)
+                        destination = os.path.join(target_folder, file)
+                        shutil.move(origin, destination)
+                        num_files_moved += 1
+                        print("moved " + file + " to " + destination)
+            except Exception as e:
+                print(e)
+                say("failed", speak)
         elif command == "read":
             with open(" ".join(words[1:]), "r") as file:
                 file_text = file.read()
@@ -269,13 +409,13 @@ def get_output(text):
             
             requests.get('https://shadomonster18.pythonanywhere.com/song/off')
         else:
-            commands = ["search", "youtube", "open", "weather", "camera"]
+            commands = ["search", "youtube", "open", "weather", "camera", "cnn", "move-files", "stream"]
             
             if command not in commands:
 
                 response = ollama.chat(model="codellama", messages=messages)
                 assistant_reply = response['message']['content']
-                print("Assistant:", assistant_reply)
+                print("Assistant:", assistant_reply)             
                 messages.append({"role": "assistant", "content": assistant_reply})
 
                 if speak:
@@ -284,7 +424,7 @@ def get_output(text):
 
             # tts = gTTS(text=assistant_reply, lang="en", slow=False)
             # tts.save("response.mp3")
-            # play_audio("response.mp3")
+            # play_audio("response.mp3")    it 
 
     except Exception as e:
         print("⚠️ Error:", e)
@@ -303,11 +443,11 @@ messages = [
 
 
 
-tts = gTTS(text="Sorry, I didn’t understand that", lang="en", slow=False)
-tts.save("sorry.mp3")
+#tts = gTTS(text="Sorry, I didn’t understand that", lang="en", slow=False)
+#tts.save("sorry.mp3")
 
-tts = gTTS(text="Listening", lang="en", slow=False)
-tts.save("listening.mp3")
+#tts = gTTS(text="Listening", lang="en", slow=False)
+#tts.save("listening.mp3")
 
 #"""
 while True:
